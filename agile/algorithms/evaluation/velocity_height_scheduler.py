@@ -387,6 +387,19 @@ class VelocityHeightScheduler:
         if hasattr(base_vel_term, "time_left"):
             base_vel_term.time_left[env_id] = 1000.0  # Large value to prevent resampling
 
+        # dr-study fix: the command class low-pass filters vel_command_b toward vel_command_target_b and
+        # target_height toward target_height_unfiltered inside _update_command(). Write the targets too,
+        # otherwise the scheduled values are overwritten by the randomly sampled targets every step.
+        if hasattr(base_vel_term, "vel_command_target_b"):
+            base_vel_term.vel_command_target_b[env_id, 0] = command_tensor[0]
+            base_vel_term.vel_command_target_b[env_id, 1] = command_tensor[1]
+            base_vel_term.vel_command_target_b[env_id, 2] = command_tensor[2]
+        if len(command_tensor) >= 4 and hasattr(base_vel_term, "target_height_unfiltered"):
+            base_vel_term.target_height_unfiltered[env_id] = command_tensor[3]
+        # Zero velocity = standing env (height commands allowed); otherwise walking env (walking height).
+        if hasattr(base_vel_term, "is_standing_env"):
+            base_vel_term.is_standing_env[env_id] = bool(torch.all(torch.abs(command_tensor[:3]) < 1e-6))
+
     def reapply_commands(self):
         """Reapply all active scheduled commands and recompute observations.
 

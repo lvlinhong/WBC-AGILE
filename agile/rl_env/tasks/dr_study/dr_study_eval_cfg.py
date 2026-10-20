@@ -9,11 +9,18 @@ Only the lower-body (legs, feet) torque-speed curve differs:
     Sat2p0   tau_sat = 2.0 * tau_lim       (B's upper bound)
     AGILE    tau_sat = AGILE's own fixed values (legs 180 Nm, feet 80 Nm)
 
-tau_sat is set in the config (not by an event), so it holds even if an eval scenario disables events.
+NoTS / AGILE set tau_sat in the config (a single number per group).
+Sat* worlds need per-joint values (k * tau_lim, and tau_lim differs per joint), which Isaac Lab's DCMotor
+cannot take from the config (it divides by cfg.saturation_effort before AGILE parses it per joint).
+So Sat* worlds apply k * tau_lim with the same reset event used by condition B, with range (k, k).
+Do not disable events in the eval scenario YAML, or the Sat* worlds fall back to NoTS.
 """
 
+from isaaclab.managers import EventTermCfg as EventTerm
+from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils.configclass import configclass
 
+from . import dr_actuator_events as dr_events
 from .dr_study_env_cfg import ALL_ACTUATORS, GENERIC_DR_EVENTS, LOWER_ACTUATORS, G1DRStudyBaseEnvCfg
 
 # Fixed actuator delay in physics steps (0.005 s each). 0 isolates the torque-speed effect.
@@ -22,16 +29,17 @@ EVAL_DELAY_STEPS = 0
 AGILE_SATURATION = {"legs": 180.0, "feet": 80.0}
 
 
-def _scaled(value, ratio):
-    if isinstance(value, dict):
-        return {k: ratio * v for k, v in value.items()}
-    return ratio * value
-
-
 def _set_lower_saturation_ratio(cfg, ratio: float) -> None:
-    for name in LOWER_ACTUATORS:
-        act = cfg.scene.robot.actuators[name]
-        act.saturation_effort = _scaled(act.effort_limit_sim, ratio)
+    """tau_sat = ratio * tau_lim per joint, applied at every reset (B's event with a fixed ratio)."""
+    cfg.events.eval_fixed_saturation_ratio = EventTerm(
+        func=dr_events.randomize_saturation_ratio,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot"),
+            "actuator_names": LOWER_ACTUATORS,
+            "ratio_range": (ratio, ratio),
+        },
+    )
 
 
 @configclass

@@ -702,7 +702,7 @@ def main():
             # evaluator needs ``extras["observations"]`` (the "eval" group). The scheduler branch
             # above refreshes ``extras`` via ``get_observations_with_extras()``; when no scheduler
             # is active, populate it here so evaluation works regardless of the eval config.
-            if True:  # dr-study: always refresh eval observations
+            if scheduler is None or "observations" not in extras:  # dr-study: refresh unless a scheduler provided them
                 extras["observations"] = env.get_observations_with_extras()[1]["observations"]
             # Update the evaluator with extras that contain the observations (and corrected commands).
             done = evaluator.collect(dones, extras)
