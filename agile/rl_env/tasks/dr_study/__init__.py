@@ -4,7 +4,7 @@ plus fixed-motor evaluation worlds."""
 import gymnasium as gym
 
 # Training conditions
-for _cond in ("Nominal", "A", "B"):
+for _cond in ("AGILE", "Nominal", "A", "B"):
     gym.register(
         id=f"DRStudy-G1-{_cond}-v0",
         entry_point="isaaclab.envs:ManagerBasedRLEnv",

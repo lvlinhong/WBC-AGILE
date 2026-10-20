@@ -4,6 +4,7 @@ Same in all conditions: robot model, tau_lim, omega_lim, PD gains, armature, act
 observations, rewards, network, PPO. Upper-body actuators (waist, arms) keep AGILE values.
 
             lower-body tau_sat        lower-body tau_lim       generic DR events   delay (physics steps)
+AGILE       180 / 80 (fixed, AGILE)   base (fixed)             on (AGILE)          0-4 (AGILE)   <- unchanged AGILE task
 Nominal     1e6 (fixed)               base (fixed)             off                 0
 A           1e6 (fixed)               s * base, s ~ U(A, per group)       on (AGILE)          0-4 (AGILE)
 B           k * base, k ~ U(B)        base (fixed)             on (AGILE)          0-4 (AGILE)
@@ -52,6 +53,13 @@ GENERIC_DR_EVENTS = [
     "apply_external_force_torque_extremities",
     "push_robot",
 ]
+
+
+@configclass
+class G1DRStudyAGILEEnvCfg(G1VelocityHeightHistoryEnvCfg):
+    """The AGILE task exactly as released (fixed DC-motor curve, generic DR, delay). Reference condition."""
+
+    pass
 
 
 @configclass

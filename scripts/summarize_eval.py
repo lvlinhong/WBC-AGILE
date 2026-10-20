@@ -33,7 +33,7 @@ PHASES = {
 HEIGHT_PHASES = ["squat", "stand_up"]
 WALK_PHASES = ["walk_1.0", "walk_1.5", "turn"]
 
-POLICIES = ["nominal", "a", "b"]
+POLICIES = ["agile", "a", "b", "nominal"]
 WORLDS = ["NoTS", "Sat2p0", "Sat1p5", "Sat1p0", "AGILE"]
 
 root = Path(args.root).expanduser()

@@ -6,6 +6,12 @@ from agile.rl_env.tasks.locomotion_height.g1.agents.rsl_rl_ppo_cfg import G1Velo
 
 
 @configclass
+class DRStudyAGILEPpoRunnerCfg(G1VelocityHeightHistoryPpoRunnerCfg):
+    experiment_name = "dr_study_g1_agile"
+    run_name = "agile_fixed_curve"
+
+
+@configclass
 class DRStudyNominalPpoRunnerCfg(G1VelocityHeightHistoryPpoRunnerCfg):
     experiment_name = "dr_study_g1_nominal"
     run_name = "nominal"

@@ -7,7 +7,7 @@
 AGILE=~/agile
 SCENARIO=$AGILE/agile/rl_env/tasks/dr_study/eval_squat_walk.yaml
 WORLDS="NoTS Sat1p0 Sat1p5 Sat2p0 AGILE"
-POLICIES=${@:-"nominal a b"}
+POLICIES=${@:-"agile a b"}
 
 for p in $POLICIES; do
   run_root=$AGILE/logs/rsl_rl/dr_study_g1_$p
