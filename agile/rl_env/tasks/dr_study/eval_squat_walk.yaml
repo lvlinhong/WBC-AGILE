@@ -1,0 +1,32 @@
+# DR study deterministic scenario (lower-body pilot, no payload).
+# Squat/stand-up and fast walking are the phases that load knee/hip near their torque-speed limits.
+#   0-3 s   stand              (h 0.72)
+#   3-6 s   squat              (h 0.40)
+#   6-9 s   stand up           (h 0.72)
+#   9-19 s  walk 1.0 m/s
+#  19-24 s  walk 1.5 m/s       (top of the training range)
+#  24-29 s  walk 0.5 m/s + turn 1.0 rad/s
+#  29-33 s  stop and stand
+evaluation:
+  task_name: "DRStudy-G1-Eval"
+  num_envs: 16
+  episode_length_s: 33.0
+  num_episodes: 1
+  environments:
+    - env_ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+      name: "squat_walk"
+      schedule:
+        - time: 0.0
+          commands: {base_velocity: {lin_vel_x: 0.0, lin_vel_y: 0.0, ang_vel_z: 0.0, base_height: 0.72}}
+        - time: 3.0
+          commands: {base_velocity: {lin_vel_x: 0.0, lin_vel_y: 0.0, ang_vel_z: 0.0, base_height: 0.40}}
+        - time: 6.0
+          commands: {base_velocity: {lin_vel_x: 0.0, lin_vel_y: 0.0, ang_vel_z: 0.0, base_height: 0.72}}
+        - time: 9.0
+          commands: {base_velocity: {lin_vel_x: 1.0, lin_vel_y: 0.0, ang_vel_z: 0.0, base_height: 0.72}}
+        - time: 19.0
+          commands: {base_velocity: {lin_vel_x: 1.5, lin_vel_y: 0.0, ang_vel_z: 0.0, base_height: 0.72}}
+        - time: 24.0
+          commands: {base_velocity: {lin_vel_x: 0.5, lin_vel_y: 0.0, ang_vel_z: 1.0, base_height: 0.72}}
+        - time: 29.0
+          commands: {base_velocity: {lin_vel_x: 0.0, lin_vel_y: 0.0, ang_vel_z: 0.0, base_height: 0.72}}

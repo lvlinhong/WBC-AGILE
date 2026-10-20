@@ -15,10 +15,11 @@
 
 # ruff: noqa: I001
 
-from . import debug, locomotion, locomotion_height, pick_place, stand_up, tracking
+from . import debug, dr_study, locomotion, locomotion_height, pick_place, stand_up, tracking
 
 __all__ = [
     "debug",
+    "dr_study",
     "locomotion",
     "locomotion_height",
     "pick_place",
