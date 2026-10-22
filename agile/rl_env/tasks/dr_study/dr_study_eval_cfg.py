@@ -9,6 +9,11 @@ Only the lower-body (legs, feet) torque-speed curve differs:
     Sat2p0   tau_sat = 2.0 * tau_lim       (B's upper bound)
     AGILE    tau_sat = AGILE's own fixed values (legs 180 Nm, feet 80 Nm)
 
+Payload variants (suffix P10, P20): a fixed mass added to torso_link at startup (10 / 20 kg),
+to raise the torque demand. Training randomized torso mass by -1..+3 kg only.
+
+The eval observation group also records applied_torque and computed_torque per joint.
+
 NoTS / AGILE set tau_sat in the config (a single number per group).
 Sat* worlds need per-joint values (k * tau_lim, and tau_lim differs per joint), which Isaac Lab's DCMotor
 cannot take from the config (it divides by cfg.saturation_effort before AGILE parses it per joint).
@@ -17,16 +22,33 @@ Do not disable events in the eval scenario YAML, or the Sat* worlds fall back to
 """
 
 from isaaclab.managers import EventTermCfg as EventTerm
+from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import SceneEntityCfg
 from isaaclab.utils.configclass import configclass
 
+from agile.rl_env import mdp
+
 from . import dr_actuator_events as dr_events
+from . import dr_obs
 from .dr_study_env_cfg import ALL_ACTUATORS, GENERIC_DR_EVENTS, LOWER_ACTUATORS, G1DRStudyBaseEnvCfg
 
 # Fixed actuator delay in physics steps (0.005 s each). 0 isolates the torque-speed effect.
 EVAL_DELAY_STEPS = 0
 
 AGILE_SATURATION = {"legs": 180.0, "feet": 80.0}
+
+
+def _add_payload(cfg, kg: float) -> None:
+    """Fixed extra mass on the torso (applied once at startup)."""
+    cfg.events.eval_payload = EventTerm(
+        func=mdp.randomize_rigid_body_mass,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
+            "mass_distribution_params": (kg, kg),
+            "operation": "add",
+        },
+    )
 
 
 def _set_lower_saturation_ratio(cfg, ratio: float) -> None:
@@ -52,6 +74,12 @@ class G1DRStudyEvalNoTSEnvCfg(G1DRStudyBaseEnvCfg):
         for ev in GENERIC_DR_EVENTS:
             if hasattr(self.events, ev):
                 setattr(self.events, ev, None)
+
+    def eval(self):
+        super().eval()
+        # record joint torques next to joint velocities (eval.py calls env_cfg.eval() before creating the env)
+        self.observations.eval.applied_torque = ObsTerm(func=dr_obs.applied_torque)
+        self.observations.eval.computed_torque = ObsTerm(func=dr_obs.computed_torque)
 
 
 @configclass
@@ -81,3 +109,76 @@ class G1DRStudyEvalAGILEEnvCfg(G1DRStudyEvalNoTSEnvCfg):
         super().__post_init__()
         for name, value in AGILE_SATURATION.items():
             self.scene.robot.actuators[name].saturation_effort = value
+
+
+# ---- payload variants ----
+
+
+@configclass
+class G1DRStudyEvalNoTSP10EnvCfg(G1DRStudyEvalNoTSEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 10.0)
+
+
+@configclass
+class G1DRStudyEvalNoTSP20EnvCfg(G1DRStudyEvalNoTSEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 20.0)
+
+
+@configclass
+class G1DRStudyEvalSat1p0P10EnvCfg(G1DRStudyEvalSat1p0EnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 10.0)
+
+
+@configclass
+class G1DRStudyEvalSat1p0P20EnvCfg(G1DRStudyEvalSat1p0EnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 20.0)
+
+
+@configclass
+class G1DRStudyEvalSat1p5P10EnvCfg(G1DRStudyEvalSat1p5EnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 10.0)
+
+
+@configclass
+class G1DRStudyEvalSat1p5P20EnvCfg(G1DRStudyEvalSat1p5EnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 20.0)
+
+
+@configclass
+class G1DRStudyEvalSat2p0P10EnvCfg(G1DRStudyEvalSat2p0EnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 10.0)
+
+
+@configclass
+class G1DRStudyEvalSat2p0P20EnvCfg(G1DRStudyEvalSat2p0EnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 20.0)
+
+
+@configclass
+class G1DRStudyEvalAGILEP10EnvCfg(G1DRStudyEvalAGILEEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 10.0)
+
+
+@configclass
+class G1DRStudyEvalAGILEP20EnvCfg(G1DRStudyEvalAGILEEnvCfg):
+    def __post_init__(self):
+        super().__post_init__()
+        _add_payload(self, 20.0)

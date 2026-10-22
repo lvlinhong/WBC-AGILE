@@ -442,7 +442,7 @@ class PolicyEvaluator:
         ]
 
         # Optional fields (nice to have for analysis but not required)
-        optional_fields = []
+        optional_fields = ["applied_torque", "computed_torque"]  # dr-study: torque recording
 
         # Extract data for each required field
         frame_data = {}

@@ -16,13 +16,17 @@ for _cond in ("AGILE", "Nominal", "A", "B"):
     )
 
 # Evaluation worlds (used with eval.py --checkpoint <policy>)
+#   DRStudy-G1-Eval-<world>-v0        no payload
+#   DRStudy-G1-Eval-<world>-P10-v0    +10 kg on the torso
+#   DRStudy-G1-Eval-<world>-P20-v0    +20 kg on the torso
 for _world in ("NoTS", "Sat1p0", "Sat1p5", "Sat2p0", "AGILE"):
-    gym.register(
-        id=f"DRStudy-G1-Eval-{_world}-v0",
-        entry_point="isaaclab.envs:ManagerBasedRLEnv",
-        disable_env_checker=True,
-        kwargs={
-            "env_cfg_entry_point": f"{__name__}.dr_study_eval_cfg:G1DRStudyEval{_world}EnvCfg",
-            "rsl_rl_cfg_entry_point": f"{__name__}.agents:DRStudyNominalPpoRunnerCfg",
-        },
-    )
+    for _p in ("", "P10", "P20"):
+        gym.register(
+            id=f"DRStudy-G1-Eval-{_world}{'-' + _p if _p else ''}-v0",
+            entry_point="isaaclab.envs:ManagerBasedRLEnv",
+            disable_env_checker=True,
+            kwargs={
+                "env_cfg_entry_point": f"{__name__}.dr_study_eval_cfg:G1DRStudyEval{_world}{_p}EnvCfg",
+                "rsl_rl_cfg_entry_point": f"{__name__}.agents:DRStudyNominalPpoRunnerCfg",
+            },
+        )
