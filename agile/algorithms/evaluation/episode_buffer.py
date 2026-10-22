@@ -38,6 +38,8 @@ class Frame:
     actions: torch.Tensor = torch.tensor([])  # [num_envs, num_joints, 1]
 
     # Add custom fields as needed
+    applied_torque: torch.Tensor = torch.tensor([])  # [num_envs, num_joints] dr-study: torque after motor model
+    computed_torque: torch.Tensor = torch.tensor([])  # [num_envs, num_joints] dr-study: PD torque before clipping
 
     @staticmethod
     def from_dict(data: dict) -> Frame:
